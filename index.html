@@ -190,3 +190,195 @@
 
 </body>
 </html>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Заявка на лабораторную/семинар</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f3f4f6;
+      display: flex;
+      justify-content: center;
+      padding: 40px 20px;
+    }
+    form {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      max-width: 500px;
+      width: 100%;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    h2 {
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: bold;
+    }
+    input, textarea, select {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 16px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+    .error {
+      color: red;
+      font-size: 12px;
+      margin-top: -12px;
+      margin-bottom: 10px;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #4f46e5;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:disabled {
+      background-color: #a5b4fc;
+      cursor: not-allowed;
+    }
+    .success-alert {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .success-box {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      max-width: 400px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+<form id="orderForm">
+  <h2>Заказать лабораторную или семинар</h2>
+
+  <label>ФИО*</label>
+  <input type="text" name="name" placeholder="Введите полное имя" required />
+  <div class="error" id="error-name"></div>
+
+  <label>Telegram для связи*</label>
+  <input type="text" name="contact" placeholder="@username или номер" required />
+  <div class="error" id="error-contact"></div>
+
+  <label>Предмет*</label>
+  <input type="text" name="subject" placeholder="Название предмета" required />
+  <div class="error" id="error-subject"></div>
+
+  <label>Номер и название лабораторной*</label>
+  <input type="text" name="labInfo" placeholder="Лабораторная №3 - Обработка сигналов" required />
+  <div class="error" id="error-labInfo"></div>
+
+  <label>Комментарий</label>
+  <textarea name="comment" placeholder="Уточнения или пожелания" rows="4"></textarea>
+
+  <button type="submit" id="submitBtn">Отправить заявку</button>
+</form>
+
+<!-- Уведомление об успешной отправке -->
+<div class="success-alert" id="successAlert" style="display: none;">
+  <div class="success-box">
+    <h3>✅ Заявка отправлена</h3>
+    <p>Алексей получил вашу заявку и свяжется с вами в ближайшее время.</p>
+    <button onclick="document.getElementById('successAlert').style.display='none'">ОК</button>
+  </div>
+</div>
+
+<script>
+  const form = document.getElementById("orderForm");
+  const submitBtn = document.getElementById("submitBtn");
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const formData = {
+      name: form.name.value.trim(),
+      contact: form.contact.value.trim(),
+      subject: form.subject.value.trim(),
+      labInfo: form.labInfo.value.trim(),
+      comment: form.comment.value.trim()
+    };
+
+    let hasError = false;
+
+    // Очистка ошибок
+    ["name", "contact", "subject", "labInfo"].forEach(field => {
+      document.getElementById(`error-${field}`).textContent = "";
+    });
+
+    // Валидация
+    if (!formData.name) {
+      document.getElementById("error-name").textContent = "Введите ФИО";
+      hasError = true;
+    }
+    if (!formData.contact || !/^(\+?\d{10,}|@\w+)$/.test(formData.contact)) {
+      document.getElementById("error-contact").textContent = "Введите корректный Telegram или номер";
+      hasError = true;
+    }
+    if (!formData.subject) {
+      document.getElementById("error-subject").textContent = "Введите название предмета";
+      hasError = true;
+    }
+    if (!formData.labInfo) {
+      document.getElementById("error-labInfo").textContent = "Введите номер и название лабораторной";
+      hasError = true;
+    }
+
+    if (hasError) return;
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Отправка...";
+
+    // 🔐 Установите токен и chat ID (замените своими)
+    const botToken = "6739035007:AAEn_Y10WBZKstTIAGQVN5zuAhTc1z78tkw";
+    const chatId = "-4957042539";
+
+    const message = `📌 Новая заявка на лабораторную/семинар:\n\n👤 ФИО: ${formData.name}\n📱 Контакт: ${formData.contact}\n📚 Предмет: ${formData.subject}\n🧪 Лабораторная/Семинар: ${formData.labInfo}\n📝 Комментарий: ${formData.comment || "—"}`;
+
+    try {
+      const response = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          chat_id: chatId,
+          text: message,
+          parse_mode: "Markdown"
+        })
+      });
+
+      if (response.ok) {
+        form.reset();
+        document.getElementById("successAlert").style.display = "flex";
+      } else {
+        alert("Ошибка при отправке. Попробуйте позже.");
+      }
+    } catch (err) {
+      alert("Ошибка подключения к Telegram.");
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Отправить заявку";
+    }
+  });
+</script>
+
+</body>
+</html>
