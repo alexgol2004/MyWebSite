@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Регистрация волонтёра</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+      <h1>Волонтерское приложение</h1>
+      <div class="nav">
+        <a href="index.html">Главная</a>
+        <a href="calendar.html">Календарь</a>
+        <a href="my_dashboard.html">Моя статистика</a>
+        <a href="organizer_registration.html">Регистрация организатора</a>
+		<a href="volunteer_registration.html">Регистрация волонтёра</a>
+		<a href="report.html">Добавить отчёт</a>
+      </div>
+    </header>
+  <main>
+    <section>
+      <h2>Новый волонтёр</h2>
+      <form id="volRegForm">
+        <div>
+          <label for="volName">Имя*</label><br>
+          <input type="text" id="volName" name="name" required>
+        </div>
+        <div>
+          <label for="volEmail">Email*</label><br>
+          <input type="email" id="volEmail" name="email" required>
+        </div>
+        <div>
+          <label for="volPhone">Телефон</label><br>
+          <input type="text" id="volPhone" name="phone">
+        </div>
+        <button type="submit">Зарегистрировать</button>
+      </form>
+      <div id="volRegMessage"></div>
+    </section>
+  </main>
+
+  <script src="volunteer.js"></script>
+</body>
+</html>

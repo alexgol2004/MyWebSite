@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Добавить отчёт</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+      <h1>Волонтерское приложение</h1>
+      <div class="nav">
+        <a href="index.html">Главная</a>
+        <a href="calendar.html">Календарь</a>
+        <a href="my_dashboard.html">Моя статистика</a>
+        <a href="organizer_registration.html">Регистрация организатора</a>
+		<a href="volunteer_registration.html">Регистрация волонтёра</a>
+		<a href="report.html">Добавить отчёт</a>
+      </div>
+    </header>
+
+  <section>
+    <h3>Добавить отчёт об активности</h3>
+    <form id="reportForm">
+      <label>Волонтёр:</label>
+      <select id="volunteerSelect" name="volunteer_id" required>
+        <option value="">Загрузка…</option>
+      </select>
+
+      <label>ID мероприятия:</label>
+      <input type="number" name="event_id" required />
+
+      <label>Часы:</label>
+      <input type="number" name="hours_spent" required />
+
+      <label>Задачи выполнено:</label>
+      <input type="number" name="tasks_completed" required />
+
+      <button type="submit">Отправить отчёт</button>
+    </form>
+  </section>
+
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const sel = document.getElementById('volunteerSelect');
+    // 1) загружаем список волонтёров
+    fetch('get_volunteers.php')
+      .then(r => r.json())
+      .then(vols => {
+        sel.innerHTML = '<option value="">— Выберите волонтёра —</option>';
+        vols.forEach(v => {
+          const o = document.createElement('option');
+          o.value = v.id;
+          o.textContent = `${v.name} (ID: ${v.id})`;
+          sel.appendChild(o);
+        });
+      })
+      .catch(err => {
+        console.error(err);
+        sel.innerHTML = '<option value="">Ошибка загрузки</option>';
+      });
+
+    // 2) обработка отправки отчёта
+    document.getElementById('reportForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const fd = Object.fromEntries(new FormData(e.target).entries());
+      try {
+        const res = await fetch('add_report.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(fd)
+        });
+        const json = await res.json();
+        if (json.status === 'success') {
+          alert('Отчёт успешно добавлен');
+          e.target.reset();
+        } else {
+          alert('Ошибка: ' + json.message);
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Не удалось отправить отчёт');
+      }
+    });
+  });
+  </script>
+</body>
+</html>

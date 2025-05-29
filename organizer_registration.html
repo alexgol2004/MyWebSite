@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Регистрация организатора</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+      <h1>Волонтерское приложение</h1>
+      <div class="nav">
+        <a href="index.html">Главная</a>
+        <a href="calendar.html">Календарь</a>
+        <a href="my_dashboard.html">Моя статистика</a>
+        <a href="organizer_registration.html">Регистрация организатора</a>
+		<a href="volunteer_registration.html">Регистрация волонтёра</a>
+		<a href="report.html">Добавить отчёт</a>
+      </div>
+    </header>
+  <main>
+    <form id="orgForm">
+      <label>Имя*:<br><input type="text" name="name" required></label><br>
+      <label>Email*:<br><input type="email" name="email" required></label><br>
+      <label>Телефон:<br><input type="text" name="phone"></label><br>
+      <button>Добавить</button>
+    </form>
+    <div id="orgMessage"></div>
+  </main>
+  <script>
+    document.getElementById('orgForm').addEventListener('submit', async e=>{
+      e.preventDefault();
+      const msg = document.getElementById('orgMessage');
+      msg.textContent = '';
+      const data = Object.fromEntries(new FormData(e.target));
+      try {
+        const res = await fetch('add_organizer.php', {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify(data)
+        });
+        const json = await res.json();
+        if (json.status==='success') {
+          msg.style.color='green';
+          msg.textContent = 'Организатор ID=' + json.organizer_id;
+          e.target.reset();
+        } else {
+          msg.style.color='red';
+          msg.textContent = json.message;
+        }
+      } catch(err) {
+        console.error(err);
+        msg.style.color='red';
+        msg.textContent = 'Ошибка сети';
+      }
+    });
+  </script>
+</body>
+</html>
